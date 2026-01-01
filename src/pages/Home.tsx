@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import avatarImg from "@/assets/avatar.jpg";
+import Hero3D from "@/components/Hero3D";
 
 const Home = () => {
   return (
@@ -101,46 +102,35 @@ const Home = () => {
             </motion.div>
           </motion.div>
 
-          {/* 3D Model Placeholder - Will be replaced with actual 3D model */}
+          {/* 3D Hero Section */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
             className="flex-1 flex items-center justify-center"
           >
-            <div className="relative w-72 h-72 md:w-96 md:h-96">
-              {/* Glow background */}
-              <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse" />
-              
-              {/* Placeholder for 3D model */}
-              <div className="relative w-full h-full rounded-full border-gradient flex items-center justify-center">
-                <div className="text-center p-8">
-                  <div className="text-6xl mb-4 animate-float">🚀</div>
-                  <p className="text-muted-foreground text-sm">
-                    3D Model Coming Soon
-                  </p>
-                </div>
-              </div>
+            <div className="relative w-72 h-72 md:w-96 md:h-96 lg:w-[500px] lg:h-[500px]">
+              <Hero3D />
 
               {/* Floating tech icons */}
               <motion.div
                 animate={{ y: [-10, 10, -10] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-4 -right-4 p-3 glass rounded-xl"
+                className="absolute -top-4 -right-4 p-3 glass rounded-xl z-10"
               >
                 <span className="text-2xl">⚛️</span>
               </motion.div>
               <motion.div
                 animate={{ y: [10, -10, 10] }}
                 transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -bottom-4 -left-4 p-3 glass rounded-xl"
+                className="absolute -bottom-4 -left-4 p-3 glass rounded-xl z-10"
               >
                 <span className="text-2xl">🔷</span>
               </motion.div>
               <motion.div
                 animate={{ y: [-5, 15, -5] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-1/2 -right-8 p-3 glass rounded-xl"
+                className="absolute top-1/2 -right-8 p-3 glass rounded-xl z-10"
               >
                 <span className="text-2xl">🟢</span>
               </motion.div>
