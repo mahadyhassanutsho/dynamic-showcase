@@ -1,21 +1,26 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, RoundedBox, Sphere, OrbitControls, MeshDistortMaterial } from "@react-three/drei";
-import { useRef, Suspense } from "react";
+import { Float, RoundedBox, Sphere, OrbitControls, MeshDistortMaterial, Html } from "@react-three/drei";
+import { useRef, Suspense, useState } from "react";
 import * as THREE from "three";
 
-// Tech icon as a colored floating box
+// Tech badge with hover tooltip
 const TechBadge = ({ 
   position, 
   color, 
+  name,
+  icon,
   scale = 0.5,
   rotationSpeed = 0.3 
 }: { 
   position: [number, number, number]; 
   color: string; 
+  name: string;
+  icon: string;
   scale?: number;
   rotationSpeed?: number;
 }) => {
   const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
     if (meshRef.current) {
@@ -25,15 +30,41 @@ const TechBadge = ({
 
   return (
     <Float speed={2} rotationIntensity={0.3} floatIntensity={1}>
-      <RoundedBox ref={meshRef} position={position} args={[1, 1, 0.2]} radius={0.1} smoothness={4} scale={scale}>
-        <meshStandardMaterial
-          color={color}
-          roughness={0.2}
-          metalness={0.8}
-          emissive={color}
-          emissiveIntensity={0.3}
-        />
-      </RoundedBox>
+      <group position={position}>
+        <RoundedBox 
+          ref={meshRef} 
+          args={[1, 1, 0.2]} 
+          radius={0.1} 
+          smoothness={4} 
+          scale={scale}
+          onPointerEnter={() => setHovered(true)}
+          onPointerLeave={() => setHovered(false)}
+        >
+          <meshStandardMaterial
+            color={color}
+            roughness={0.2}
+            metalness={0.8}
+            emissive={color}
+            emissiveIntensity={hovered ? 0.6 : 0.3}
+          />
+        </RoundedBox>
+        
+        {/* Tooltip label */}
+        <Html
+          position={[0, scale * 0.8, 0]}
+          center
+          style={{
+            opacity: hovered ? 1 : 0,
+            transition: 'opacity 0.2s ease',
+            pointerEvents: 'none',
+          }}
+        >
+          <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-lg border border-border/50 whitespace-nowrap">
+            <img src={icon} alt={name} className="w-4 h-4" />
+            <span className="text-xs font-medium text-foreground">{name}</span>
+          </div>
+        </Html>
+      </group>
     </Float>
   );
 };
@@ -110,6 +141,20 @@ const CodeBracket = ({ position, color, scale = 1 }: {
   );
 };
 
+// Tech stack data with CDN icons
+const techStack = [
+  { position: [2.8, 1.5, 0] as [number, number, number], color: "#61dafb", name: "React", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg", rotationSpeed: 0.3 },
+  { position: [-2.8, 1.5, 0] as [number, number, number], color: "#38bdf8", name: "Tailwind CSS", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg", rotationSpeed: 0.4 },
+  { position: [2.5, -1.8, 0.5] as [number, number, number], color: "#171717", name: "Next.js", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg", rotationSpeed: 0.35 },
+  { position: [-2.5, -1.8, 0.5] as [number, number, number], color: "#3178c6", name: "TypeScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg", rotationSpeed: 0.45 },
+  { position: [0, 2.8, -0.5] as [number, number, number], color: "#68a063", name: "Node.js", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg", rotationSpeed: 0.25 },
+  { position: [-1.8, 2.2, 0.3] as [number, number, number], color: "#5a67d8", name: "Prisma", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/prisma/prisma-original.svg", rotationSpeed: 0.38 },
+  { position: [1.8, 2.2, 0.3] as [number, number, number], color: "#336791", name: "PostgreSQL", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg", rotationSpeed: 0.32 },
+  { position: [0, -2.5, 0] as [number, number, number], color: "#47a248", name: "MongoDB", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg", rotationSpeed: 0.28 },
+  { position: [-3, 0, -0.5] as [number, number, number], color: "#ffca28", name: "Firebase", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg", rotationSpeed: 0.4 },
+  { position: [3, 0, -0.5] as [number, number, number], color: "#f7df1e", name: "JavaScript", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg", rotationSpeed: 0.35 },
+];
+
 const Scene = () => {
   return (
     <>
@@ -121,35 +166,18 @@ const Scene = () => {
       {/* Central rotating element */}
       <CentralSphere />
       
-      {/* Tech badges floating around - React (cyan) */}
-      <TechBadge position={[2.8, 1.5, 0]} color="#61dafb" scale={0.6} rotationSpeed={0.3} />
-      
-      {/* Tailwind (sky blue) */}
-      <TechBadge position={[-2.8, 1.5, 0]} color="#38bdf8" scale={0.55} rotationSpeed={0.4} />
-      
-      {/* Next.js (dark) */}
-      <TechBadge position={[2.5, -1.8, 0.5]} color="#171717" scale={0.5} rotationSpeed={0.35} />
-      
-      {/* TypeScript (blue) */}
-      <TechBadge position={[-2.5, -1.8, 0.5]} color="#3178c6" scale={0.55} rotationSpeed={0.45} />
-      
-      {/* Node.js (green) */}
-      <TechBadge position={[0, 2.8, -0.5]} color="#68a063" scale={0.5} rotationSpeed={0.25} />
-      
-      {/* Prisma (dark purple) */}
-      <TechBadge position={[-1.5, 2.2, 0.3]} color="#2d3748" scale={0.45} rotationSpeed={0.38} />
-      
-      {/* PostgreSQL (blue) */}
-      <TechBadge position={[1.5, 2.2, 0.3]} color="#336791" scale={0.45} rotationSpeed={0.32} />
-      
-      {/* MongoDB (green) */}
-      <TechBadge position={[0, -2.5, 0]} color="#47a248" scale={0.5} rotationSpeed={0.28} />
-      
-      {/* Firebase (orange) */}
-      <TechBadge position={[-3, 0, -0.5]} color="#ffca28" scale={0.45} rotationSpeed={0.4} />
-      
-      {/* JavaScript (yellow) */}
-      <TechBadge position={[3, 0, -0.5]} color="#f7df1e" scale={0.45} rotationSpeed={0.35} />
+      {/* Tech badges with icons and tooltips */}
+      {techStack.map((tech) => (
+        <TechBadge
+          key={tech.name}
+          position={tech.position}
+          color={tech.color}
+          name={tech.name}
+          icon={tech.icon}
+          scale={0.55}
+          rotationSpeed={tech.rotationSpeed}
+        />
+      ))}
       
       {/* Code brackets decoration */}
       <CodeBracket position={[-1.8, -0.5, -1]} color="#a855f7" scale={0.8} />
