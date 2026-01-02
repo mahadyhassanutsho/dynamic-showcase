@@ -1,108 +1,111 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Text, RoundedBox, OrbitControls } from "@react-three/drei";
+import { Float, RoundedBox, Sphere, OrbitControls, MeshDistortMaterial } from "@react-three/drei";
 import { useRef, Suspense } from "react";
 import * as THREE from "three";
 
-// Tech icon component with floating animation
-const TechIcon = ({ 
+// Tech icon as a colored floating box
+const TechBadge = ({ 
   position, 
   color, 
-  text, 
-  rotationSpeed = 0.5 
+  scale = 0.5,
+  rotationSpeed = 0.3 
 }: { 
   position: [number, number, number]; 
   color: string; 
-  text: string;
+  scale?: number;
   rotationSpeed?: number;
 }) => {
-  const groupRef = useRef<THREE.Group>(null);
+  const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * rotationSpeed;
+    if (meshRef.current) {
+      meshRef.current.rotation.y = state.clock.elapsedTime * rotationSpeed;
     }
   });
 
   return (
     <Float speed={2} rotationIntensity={0.3} floatIntensity={1}>
-      <group ref={groupRef} position={position}>
-        <RoundedBox args={[1.2, 1.2, 0.2]} radius={0.15} smoothness={4}>
-          <meshStandardMaterial
-            color={color}
-            roughness={0.2}
-            metalness={0.8}
-            emissive={color}
-            emissiveIntensity={0.3}
-          />
-        </RoundedBox>
-        <Text
-          position={[0, 0, 0.15]}
-          fontSize={0.35}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/inter-bold.woff"
-        >
-          {text}
-        </Text>
-      </group>
+      <RoundedBox ref={meshRef} position={position} args={[1, 1, 0.2]} radius={0.1} smoothness={4} scale={scale}>
+        <meshStandardMaterial
+          color={color}
+          roughness={0.2}
+          metalness={0.8}
+          emissive={color}
+          emissiveIntensity={0.3}
+        />
+      </RoundedBox>
     </Float>
   );
 };
 
-// Main code bracket decoration
-const CodeBracket = ({ position, rotation, color }: { 
-  position: [number, number, number]; 
-  rotation: [number, number, number];
-  color: string;
-}) => {
+// Central animated sphere with distortion
+const CentralSphere = () => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
-    }
-  });
-
-  return (
-    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
-      <Text
-        ref={meshRef}
-        position={position}
-        rotation={rotation}
-        fontSize={2}
-        color={color}
-        anchorX="center"
-        anchorY="middle"
-      >
-        {"</>"}
-      </Text>
-    </Float>
-  );
-};
-
-// Central rotating cube with code symbol
-const CentralCube = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = state.clock.elapsedTime * 0.3;
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.4;
+      meshRef.current.rotation.x = state.clock.elapsedTime * 0.2;
+      meshRef.current.rotation.y = state.clock.elapsedTime * 0.3;
     }
   });
 
   return (
     <Float speed={2} rotationIntensity={0.5} floatIntensity={1.5}>
-      <RoundedBox ref={meshRef} args={[2, 2, 2]} radius={0.2} smoothness={4}>
-        <meshStandardMaterial
+      <Sphere ref={meshRef} args={[1.5, 64, 64]}>
+        <MeshDistortMaterial
           color="#00d4ff"
-          roughness={0.1}
-          metalness={0.9}
-          emissive="#00d4ff"
-          emissiveIntensity={0.4}
+          attach="material"
+          distort={0.4}
+          speed={2}
+          roughness={0.2}
+          metalness={0.8}
         />
-      </RoundedBox>
+      </Sphere>
+    </Float>
+  );
+};
+
+// Code bracket decoration
+const CodeBracket = ({ position, color, scale = 1 }: { 
+  position: [number, number, number]; 
+  color: string;
+  scale?: number;
+}) => {
+  const groupRef = useRef<THREE.Group>(null);
+
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.z = Math.sin(state.clock.elapsedTime * 0.5) * 0.1;
+    }
+  });
+
+  return (
+    <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.5}>
+      <group ref={groupRef} position={position} scale={scale}>
+        {/* Left bracket < */}
+        <mesh position={[-0.3, 0, 0]} rotation={[0, 0, Math.PI / 4]}>
+          <boxGeometry args={[0.1, 0.8, 0.1]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        <mesh position={[-0.3, 0, 0]} rotation={[0, 0, -Math.PI / 4]}>
+          <boxGeometry args={[0.1, 0.8, 0.1]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        {/* Slash / */}
+        <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI / 6]}>
+          <boxGeometry args={[0.08, 1, 0.08]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        {/* Right bracket > */}
+        <mesh position={[0.3, 0, 0]} rotation={[0, 0, -Math.PI / 4]}>
+          <boxGeometry args={[0.1, 0.8, 0.1]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+        <mesh position={[0.3, 0, 0]} rotation={[0, 0, Math.PI / 4]}>
+          <boxGeometry args={[0.1, 0.8, 0.1]} />
+          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} />
+        </mesh>
+      </group>
     </Float>
   );
 };
@@ -116,18 +119,41 @@ const Scene = () => {
       <pointLight position={[5, 5, 5]} intensity={0.6} color="#00d4ff" />
       
       {/* Central rotating element */}
-      <CentralCube />
+      <CentralSphere />
       
-      {/* Tech icons floating around */}
-      <TechIcon position={[2.5, 1.2, 0]} color="#61dafb" text="⚛" rotationSpeed={0.3} />
-      <TechIcon position={[-2.5, 1.2, 0]} color="#38bdf8" text="TW" rotationSpeed={0.4} />
-      <TechIcon position={[2.2, -1.5, 0.5]} color="#000000" text="N" rotationSpeed={0.35} />
-      <TechIcon position={[-2.2, -1.5, 0.5]} color="#3178c6" text="TS" rotationSpeed={0.45} />
-      <TechIcon position={[0, 2.2, -0.5]} color="#68a063" text="JS" rotationSpeed={0.25} />
+      {/* Tech badges floating around - React (cyan) */}
+      <TechBadge position={[2.8, 1.5, 0]} color="#61dafb" scale={0.6} rotationSpeed={0.3} />
+      
+      {/* Tailwind (sky blue) */}
+      <TechBadge position={[-2.8, 1.5, 0]} color="#38bdf8" scale={0.55} rotationSpeed={0.4} />
+      
+      {/* Next.js (dark) */}
+      <TechBadge position={[2.5, -1.8, 0.5]} color="#171717" scale={0.5} rotationSpeed={0.35} />
+      
+      {/* TypeScript (blue) */}
+      <TechBadge position={[-2.5, -1.8, 0.5]} color="#3178c6" scale={0.55} rotationSpeed={0.45} />
+      
+      {/* Node.js (green) */}
+      <TechBadge position={[0, 2.8, -0.5]} color="#68a063" scale={0.5} rotationSpeed={0.25} />
+      
+      {/* Prisma (dark purple) */}
+      <TechBadge position={[-1.5, 2.2, 0.3]} color="#2d3748" scale={0.45} rotationSpeed={0.38} />
+      
+      {/* PostgreSQL (blue) */}
+      <TechBadge position={[1.5, 2.2, 0.3]} color="#336791" scale={0.45} rotationSpeed={0.32} />
+      
+      {/* MongoDB (green) */}
+      <TechBadge position={[0, -2.5, 0]} color="#47a248" scale={0.5} rotationSpeed={0.28} />
+      
+      {/* Firebase (orange) */}
+      <TechBadge position={[-3, 0, -0.5]} color="#ffca28" scale={0.45} rotationSpeed={0.4} />
+      
+      {/* JavaScript (yellow) */}
+      <TechBadge position={[3, 0, -0.5]} color="#f7df1e" scale={0.45} rotationSpeed={0.35} />
       
       {/* Code brackets decoration */}
-      <CodeBracket position={[-1.8, 0, -1]} rotation={[0, 0.3, 0]} color="#a855f7" />
-      <CodeBracket position={[1.8, 0, -1]} rotation={[0, -0.3, 0]} color="#ec4899" />
+      <CodeBracket position={[-1.8, -0.5, -1]} color="#a855f7" scale={0.8} />
+      <CodeBracket position={[1.8, -0.5, -1]} color="#ec4899" scale={0.8} />
       
       <OrbitControls 
         enableZoom={false} 
@@ -148,7 +174,7 @@ const Hero3D = () => {
       <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl animate-pulse" />
       
       <Canvas
-        camera={{ position: [0, 0, 7], fov: 45 }}
+        camera={{ position: [0, 0, 8], fov: 45 }}
         style={{ background: "transparent" }}
       >
         <Suspense fallback={null}>
