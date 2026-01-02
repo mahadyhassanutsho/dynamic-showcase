@@ -25,10 +25,10 @@ const Home = () => {
               className="flex items-center gap-3 justify-center lg:justify-start mb-6"
             >
               <Avatar className="h-12 w-12 avatar-glow">
-                <AvatarImage src={avatarImg} alt="Ayan" />
-                <AvatarFallback>AY</AvatarFallback>
+                <AvatarImage src={avatarImg} alt="Utsho MH" />
+                <AvatarFallback>UM</AvatarFallback>
               </Avatar>
-              <span className="text-muted-foreground">Hey, I'm Ayan 👋</span>
+              <span className="text-muted-foreground">Hey, I'm Utsho MH 👋</span>
             </motion.div>
 
             <motion.h1

@@ -31,10 +31,10 @@ const Navbar = () => {
           <Link to="/" className="flex items-center gap-3 group">
             <Avatar className="h-10 w-10 ring-2 ring-primary/50 transition-all duration-300 group-hover:ring-primary">
               <AvatarImage src={avatarImg} alt="Developer" />
-              <AvatarFallback>AY</AvatarFallback>
+              <AvatarFallback>UM</AvatarFallback>
             </Avatar>
             <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">
-              Ayan
+              Utsho MH
             </span>
           </Link>
 
