@@ -3,7 +3,21 @@ import { Float, RoundedBox, Sphere, OrbitControls, MeshDistortMaterial, Html } f
 import { useRef, Suspense, useState } from "react";
 import * as THREE from "three";
 
-// Tech badge with icon on cube face and hover tooltip
+// Documentation URLs for each technology
+const docUrls: Record<string, string> = {
+  "React": "https://react.dev",
+  "Tailwind CSS": "https://tailwindcss.com/docs",
+  "Next.js": "https://nextjs.org/docs",
+  "TypeScript": "https://www.typescriptlang.org/docs",
+  "Node.js": "https://nodejs.org/docs",
+  "Prisma": "https://www.prisma.io/docs",
+  "PostgreSQL": "https://www.postgresql.org/docs",
+  "MongoDB": "https://www.mongodb.com/docs",
+  "Firebase": "https://firebase.google.com/docs",
+  "JavaScript": "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
+};
+
+// Tech badge with icon on cube face, hover tooltip, and click interaction
 const TechBadge = ({ 
   position, 
   color, 
@@ -28,6 +42,13 @@ const TechBadge = ({
     }
   });
 
+  const handleClick = () => {
+    const url = docUrls[name];
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <Float speed={2} rotationIntensity={0.3} floatIntensity={1}>
       <group position={position}>
@@ -35,25 +56,44 @@ const TechBadge = ({
           ref={groupRef}
           onPointerEnter={() => setHovered(true)}
           onPointerLeave={() => setHovered(false)}
+          onClick={handleClick}
         >
+          {/* Glow effect behind cube */}
+          <mesh scale={scale * 1.3}>
+            <sphereGeometry args={[0.6, 16, 16]} />
+            <meshBasicMaterial
+              color={color}
+              transparent
+              opacity={hovered ? 0.4 : 0.15}
+            />
+          </mesh>
+          
           <RoundedBox 
-            args={[1, 1, 0.2]} 
-            radius={0.1} 
+            args={[1, 1, 0.25]} 
+            radius={0.12} 
             smoothness={4} 
             scale={scale}
           >
             <meshStandardMaterial
-              color={color}
-              roughness={0.2}
-              metalness={0.8}
+              color={hovered ? "#ffffff" : color}
+              roughness={0.15}
+              metalness={0.9}
               emissive={color}
-              emissiveIntensity={hovered ? 0.6 : 0.3}
+              emissiveIntensity={hovered ? 1 : 0.4}
             />
           </RoundedBox>
           
+          {/* Outer ring on hover */}
+          {hovered && (
+            <mesh scale={scale * 1.1} rotation={[0, 0, 0]}>
+              <ringGeometry args={[0.55, 0.6, 32]} />
+              <meshBasicMaterial color={color} transparent opacity={0.6} side={THREE.DoubleSide} />
+            </mesh>
+          )}
+          
           {/* Icon on front face */}
           <Html
-            position={[0, 0, scale * 0.12]}
+            position={[0, 0, scale * 0.14]}
             center
             transform
             occlude
@@ -62,20 +102,25 @@ const TechBadge = ({
             }}
           >
             <div 
-              className="flex items-center justify-center rounded-md"
+              className="flex items-center justify-center rounded-lg"
               style={{ 
-                width: `${scale * 70}px`, 
-                height: `${scale * 70}px`,
-                background: 'rgba(0,0,0,0.3)',
+                width: `${scale * 80}px`, 
+                height: `${scale * 80}px`,
+                background: `radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 100%)`,
+                backdropFilter: 'blur(4px)',
+                cursor: 'pointer',
               }}
             >
               <img 
                 src={icon} 
                 alt={name} 
                 style={{ 
-                  width: `${scale * 50}px`, 
-                  height: `${scale * 50}px`,
-                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))'
+                  width: `${scale * 55}px`, 
+                  height: `${scale * 55}px`,
+                  filter: hovered 
+                    ? 'drop-shadow(0 0 10px rgba(255,255,255,0.9)) brightness(1.2)' 
+                    : 'drop-shadow(0 0 4px rgba(255,255,255,0.5))',
+                  transition: 'filter 0.2s ease',
                 }}
               />
             </div>
@@ -83,7 +128,7 @@ const TechBadge = ({
           
           {/* Icon on back face */}
           <Html
-            position={[0, 0, -scale * 0.12]}
+            position={[0, 0, -scale * 0.14]}
             center
             transform
             occlude
@@ -93,29 +138,33 @@ const TechBadge = ({
             }}
           >
             <div 
-              className="flex items-center justify-center rounded-md"
+              className="flex items-center justify-center rounded-lg"
               style={{ 
-                width: `${scale * 70}px`, 
-                height: `${scale * 70}px`,
-                background: 'rgba(0,0,0,0.3)',
+                width: `${scale * 80}px`, 
+                height: `${scale * 80}px`,
+                background: `radial-gradient(circle, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 100%)`,
+                backdropFilter: 'blur(4px)',
               }}
             >
               <img 
                 src={icon} 
                 alt={name} 
                 style={{ 
-                  width: `${scale * 50}px`, 
-                  height: `${scale * 50}px`,
-                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))'
+                  width: `${scale * 55}px`, 
+                  height: `${scale * 55}px`,
+                  filter: hovered 
+                    ? 'drop-shadow(0 0 10px rgba(255,255,255,0.9)) brightness(1.2)' 
+                    : 'drop-shadow(0 0 4px rgba(255,255,255,0.5))',
+                  transition: 'filter 0.2s ease',
                 }}
               />
             </div>
           </Html>
         </group>
         
-        {/* Tooltip label */}
+        {/* Tooltip label with click hint */}
         <Html
-          position={[0, scale * 0.8, 0]}
+          position={[0, scale * 0.9, 0]}
           center
           style={{
             opacity: hovered ? 1 : 0,
@@ -123,9 +172,12 @@ const TechBadge = ({
             pointerEvents: 'none',
           }}
         >
-          <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-lg border border-border/50 whitespace-nowrap">
-            <img src={icon} alt={name} className="w-4 h-4" />
-            <span className="text-xs font-medium text-foreground">{name}</span>
+          <div className="flex flex-col items-center gap-1 px-3 py-2 glass rounded-lg border border-border/50 whitespace-nowrap">
+            <div className="flex items-center gap-2">
+              <img src={icon} alt={name} className="w-4 h-4" />
+              <span className="text-xs font-medium text-foreground">{name}</span>
+            </div>
+            <span className="text-[10px] text-muted-foreground">Click to view docs</span>
           </div>
         </Html>
       </group>
