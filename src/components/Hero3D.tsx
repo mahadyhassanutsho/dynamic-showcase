@@ -3,7 +3,7 @@ import { Float, RoundedBox, Sphere, OrbitControls, MeshDistortMaterial, Html } f
 import { useRef, Suspense, useState } from "react";
 import * as THREE from "three";
 
-// Tech badge with hover tooltip
+// Tech badge with icon on cube face and hover tooltip
 const TechBadge = ({ 
   position, 
   color, 
@@ -19,35 +19,99 @@ const TechBadge = ({
   scale?: number;
   rotationSpeed?: number;
 }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
+  const groupRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * rotationSpeed;
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * rotationSpeed;
     }
   });
 
   return (
     <Float speed={2} rotationIntensity={0.3} floatIntensity={1}>
       <group position={position}>
-        <RoundedBox 
-          ref={meshRef} 
-          args={[1, 1, 0.2]} 
-          radius={0.1} 
-          smoothness={4} 
-          scale={scale}
+        <group 
+          ref={groupRef}
           onPointerEnter={() => setHovered(true)}
           onPointerLeave={() => setHovered(false)}
         >
-          <meshStandardMaterial
-            color={color}
-            roughness={0.2}
-            metalness={0.8}
-            emissive={color}
-            emissiveIntensity={hovered ? 0.6 : 0.3}
-          />
-        </RoundedBox>
+          <RoundedBox 
+            args={[1, 1, 0.2]} 
+            radius={0.1} 
+            smoothness={4} 
+            scale={scale}
+          >
+            <meshStandardMaterial
+              color={color}
+              roughness={0.2}
+              metalness={0.8}
+              emissive={color}
+              emissiveIntensity={hovered ? 0.6 : 0.3}
+            />
+          </RoundedBox>
+          
+          {/* Icon on front face */}
+          <Html
+            position={[0, 0, scale * 0.12]}
+            center
+            transform
+            occlude
+            style={{
+              pointerEvents: 'none',
+            }}
+          >
+            <div 
+              className="flex items-center justify-center rounded-md"
+              style={{ 
+                width: `${scale * 70}px`, 
+                height: `${scale * 70}px`,
+                background: 'rgba(0,0,0,0.3)',
+              }}
+            >
+              <img 
+                src={icon} 
+                alt={name} 
+                style={{ 
+                  width: `${scale * 50}px`, 
+                  height: `${scale * 50}px`,
+                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))'
+                }}
+              />
+            </div>
+          </Html>
+          
+          {/* Icon on back face */}
+          <Html
+            position={[0, 0, -scale * 0.12]}
+            center
+            transform
+            occlude
+            rotation={[0, Math.PI, 0]}
+            style={{
+              pointerEvents: 'none',
+            }}
+          >
+            <div 
+              className="flex items-center justify-center rounded-md"
+              style={{ 
+                width: `${scale * 70}px`, 
+                height: `${scale * 70}px`,
+                background: 'rgba(0,0,0,0.3)',
+              }}
+            >
+              <img 
+                src={icon} 
+                alt={name} 
+                style={{ 
+                  width: `${scale * 50}px`, 
+                  height: `${scale * 50}px`,
+                  filter: 'drop-shadow(0 0 4px rgba(255,255,255,0.5))'
+                }}
+              />
+            </div>
+          </Html>
+        </group>
         
         {/* Tooltip label */}
         <Html
